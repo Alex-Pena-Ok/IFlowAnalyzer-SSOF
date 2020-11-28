@@ -1,2 +1,2 @@
-# IFlowAnalyze-SSOF
-Information Flow Analyze for SSOF
+# IFlowAnalyzer-SSOF
+Information Flow Analyzer for SSOF
