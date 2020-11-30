@@ -67,11 +67,10 @@ class Context:
         return ""
 
     # Create Vulnerability
-    def createVulnerability(self, vulnName, source, sink, variable):
+    def createVulnerability(self, vulnName, source, sink):
         # Vulnerability found, passing a tainted variable to a sink
         vuln = Vulnerability()
         vuln.setSink(sink)
-        vuln.setVariable(variable)
         vuln.setName(vulnName)
         vuln.setSource(source)
 
