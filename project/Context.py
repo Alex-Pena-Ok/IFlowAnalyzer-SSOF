@@ -5,15 +5,6 @@ from VulnerabilityPattern import VulnerabilityPattern
 
 # This class contains the context of the program execution, aka. variables found, vulnerabilities...
 
-# Create Vulnerability
-def createVulnerability(vulnName, source, sink, variable):
-    # Vulnerability found, passing a tainted variable to a sink
-    vuln = Vulnerability()
-    vuln.sink = sink
-    vuln.variable = variable
-    vuln.name = vulnName
-    vuln.source = source
-
 
 class Context:
     # Keeps track of the state of the program during "execution"
@@ -64,8 +55,17 @@ class Context:
         for vuln in self.vulnerabilitiesInPattern:
             list = vuln.getList(etype)
             if element in list:
-                return vuln.vulnerability
+                return vuln.getVulnerability()
         return ""
+
+    # Create Vulnerability
+    def createVulnerability(self, vulnName, source, sink, variable):
+        # Vulnerability found, passing a tainted variable to a sink
+        vuln = Vulnerability()
+        vuln.sink = sink
+        vuln.variable = variable
+        vuln.name = vulnName
+        vuln.source = source
 
     # Outputs the conclusion of the analysis tool
     def writeOutput(self):
