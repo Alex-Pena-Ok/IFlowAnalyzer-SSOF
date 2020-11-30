@@ -17,6 +17,18 @@ def rightLiteralAssignment(right, left, ctx):
     return
 
 
+# Check if the right side value is tainted
+def rightIdentifierAssignment(right, left, ctx):
+    ltype = left["type"]
+    varName = right["name"]
+
+    if ctx.checkVariable(varName):
+        leftAssignmentType[ltype](left, True, ctx, sourceName=ctx.getSource(varName))
+    else:
+        leftAssignmentType[ltype](left, False, ctx)
+    return
+
+
 # In a Expression Assignment, function call's, can only be
 # present in the right side
 def rightCallExpressionAssignment(right, left, ctx):
@@ -52,6 +64,8 @@ def rightCallExpressionAssignment(right, left, ctx):
 
     # The right side function is neither source, sink or sanitizer, some random function therefore
     # variable created is considered untainted
+    #TODO: If its not sanitizer, sink or source and its another nested function, the nested function must be checked too
+    # recursively call same function?
     leftAssignmentType[ltype](left, False, ctx)
     return
 
@@ -59,6 +73,7 @@ def rightCallExpressionAssignment(right, left, ctx):
 # In the right side of an assignment, a member expression can
 # only be a source, if it is a source the left side variable
 # will be tainted.
+# TODO: I don't think there are any memberExpression tests
 def rightMemberExpressionAssignment(right, left, ctx):
     functionName = right["callee"]["name"]
     ltype = left["type"]

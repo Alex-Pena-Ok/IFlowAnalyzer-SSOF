@@ -1,3 +1,5 @@
+import json
+
 from Variable import Variable
 from Vulnerability import Vulnerability
 from VulnerabilityPattern import VulnerabilityPattern
@@ -19,6 +21,12 @@ class Context:
 
     # Add's a variable to the program context
     def addVariable(self, variable):
+        # Check if variable already exists, if so just update it
+        for var in self.variables:
+            if variable.getName() == var.getName():
+                var.setTainted(variable.getTainted())
+                var.setSource(variable.getSource())
+                return
         self.variables.append(variable)
 
     # Check's if the current variable is tainted or not,
@@ -30,7 +38,7 @@ class Context:
                     return True
 
         # Variable does not exist yet, therefore create it, untainted
-        var = Variable(variableName, False)
+        var = Variable(variableName, False, "Doesn't matter")
         return False
 
     # Initialize vulnerability pattern structures
@@ -62,18 +70,37 @@ class Context:
     def createVulnerability(self, vulnName, source, sink, variable):
         # Vulnerability found, passing a tainted variable to a sink
         vuln = Vulnerability()
-        vuln.sink = sink
-        vuln.variable = variable
-        vuln.name = vulnName
-        vuln.source = source
+        vuln.setSink(sink)
+        vuln.setVariable(variable)
+        vuln.setName(vulnName)
+        vuln.setSource(source)
+
+        for vulnPattern in self.vulnerabilitiesInPattern:
+            if vulnPattern.getVulnerability() == vulnName:
+                vuln.setSanitizer(vulnPattern.getSanitizers())
+                break
+
+        return vuln
+
+    # Gets the source associated with the TAINTED variable
+    def getSource(self, argumentName):
+        for var in self.variables:
+            if var.getName() == argumentName:
+                return var.getSource()
+        return "SOURCE NOT FOUND"
 
     # Outputs the conclusion of the analysis tool
     def writeOutput(self):
-        print("Analysis Result:\n")
+        print("Analysis Result:")
 
         if len(self.vulnerabilitiesFound) == 0:
             print("No vulnerabilities found.")
         else:
             for vuln in self.vulnerabilitiesFound:
-                print("Vulnerability: %s | Source: %s | Sink: %s | Variable: %s\n" %
-                      vuln.vulnerability, vuln.source, vuln.sink, vuln.variable.name)
+                obj = {
+                    "vulnerability": vuln.getVulnerability(),
+                    "source": vuln.getSource(),
+                    "sink": vuln.getSink(),
+                    "sanitizer": vuln.getSanitizer()
+                }
+                print(json.dumps(obj))
