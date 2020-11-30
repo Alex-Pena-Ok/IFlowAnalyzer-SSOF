@@ -15,14 +15,15 @@ def executeAssignment(step, ctx):
 
     rightAssignmentType[rtype](right, left, ctx)
 
-
 # Executes a CallExpression, e.g. a() | a(b()) | a(b)
 def executeCall(step, ctx):
     #TODO
     print("TODO")
+    return "bool tainted or not"
 
 
 # Executes a BinaryExpression, e.g. a == b (the left or right can be an MemberExpression)
 def executeBinaryExpression(step, ctx):
     #TODO
     print("TODO")
+    return "bool tainted or not"

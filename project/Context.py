@@ -11,6 +11,7 @@ class Context:
     vulnerabilitiesInPattern = []
     vulnerabilitiesFound = []
     variables = []
+    taint = False
 
     # Add's a vulnerability to the program context
     def addVulnerability(self, vulnerability):
