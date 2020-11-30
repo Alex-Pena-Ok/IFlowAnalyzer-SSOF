@@ -11,8 +11,15 @@ expressionTypes = {
 assignmentTypes = {
     'ExpressionStatement': checkExpressionStatement,
     'IfStatement': checkIfStatement,
-    'WhileStatement': checkWhileStatement
+    'WhileStatement': checkWhileStatement,
+    'BlockStatement': checkBlockStatement
 }
+
+# Executes the program step by step
+def checkSteps(programSteps, ctx):
+    for step in programSteps:
+        assignmentType = step["type"]
+        assignmentTypes[assignmentType](step, ctx)
 
 # Executes an ExpressionStatement, assignments or function call's
 def checkExpressionStatement(step, ctx):
