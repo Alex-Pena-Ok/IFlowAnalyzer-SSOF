@@ -7,14 +7,6 @@ expressionTypes = {
     'BinaryExpression': executeBinaryExpression
 }
 
-# Dictionary to map between the statement type and the actual function to call
-assignmentTypes = {
-    'ExpressionStatement': checkExpressionStatement,
-    'IfStatement': checkIfStatement,
-    'WhileStatement': checkWhileStatement,
-    'BlockStatement': checkBlockStatement
-}
-
 # Executes the program step by step
 def checkSteps(programSteps, ctx):
     for step in programSteps:
@@ -31,7 +23,7 @@ def checkExpressionStatement(step, ctx):
 def checkIfStatement(step, ctx):
     test = step["test"]
     testType = test["type"]
-    ctx.taint = expressionTypes[testType](test)
+    ctx.taint = expressionTypes[testType](test, ctx)
 
     block = step["consequent"]
     checkBlockStatement(block, ctx)
@@ -40,7 +32,7 @@ def checkIfStatement(step, ctx):
 def checkWhileStatement(step, ctx):
     test = step["test"]
     testType = test["type"]
-    ctx.taint = expressionTypes[testType](test)
+    ctx.taint = expressionTypes[testType](test, ctx)
 
     block = step["consequent"]
     checkBlockStatement(block, ctx)
@@ -49,7 +41,15 @@ def checkWhileStatement(step, ctx):
 # Pass the taint value of the conditional through the Context variable
 def checkBlockStatement(step, ctx):
     block = step["body"]
-    for step in block:
-        assignmentType = step["type"]
-        assignmentTypes[assignmentType](step, ctx)
+    checkSteps(block, ctx)
+    
+    #TODO
     ctx.taint = False
+
+# Dictionary to map between the statement type and the actual function to call
+assignmentTypes = {
+    'ExpressionStatement': checkExpressionStatement,
+    'IfStatement': checkIfStatement,
+    'WhileStatement': checkWhileStatement,
+    'BlockStatement': checkBlockStatement
+}
