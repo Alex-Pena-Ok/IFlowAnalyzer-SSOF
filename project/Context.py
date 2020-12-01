@@ -30,17 +30,24 @@ class Context:
                 return
         self.variables.append(variable)
 
-    # Check's if the current variable is tainted or not,
-    # if the variable doesn't exist yet in the current context creates it untainted.
+    # Check's if the current variable is tainted or not
     def checkVariable(self, variableName):
         for currVar in self.variables:
+            # Variable exists
             if currVar.name == variableName:
                 if currVar.tainted:
                     return True
+                else:
+                    return False
 
         # Variable does not exist yet, therefore create it, untainted
-        var = Variable(variableName, False, "Doesn't matter")
-        return False
+        # e.g. used in function arguments for the first time
+        sourceVar = True if self.searchInVulnPattern(variableName, SOURCES) != "" else False
+        source = variableName if sourceVar else "Doesn't matter"
+        var = Variable(variableName, sourceVar, source)
+        self.addVariable(var)
+
+        return sourceVar
 
     # Initialize vulnerability pattern structures
     def initVulnPattern(self, vulnPattern):
@@ -93,7 +100,7 @@ class Context:
                     return source
                 else:
                     return self.getSource(source)   # Finds the SOURCE of this TAINTED variable recursively
-        return "SOURCE NOT FOUND"
+        return argumentName
 
     # Outputs the conclusion of the analysis tool
     def writeOutput(self):

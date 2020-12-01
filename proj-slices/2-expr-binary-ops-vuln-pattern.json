@@ -3,6 +3,6 @@
         "vulnerability": "Command Injection",
         "sources": ["b"],
         "sanitizers": [],
-        "sinks": ["e"]
+        "sinks": []
     }
 ]

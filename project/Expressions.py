@@ -24,7 +24,7 @@ def executeAssignment(step, ctx):
 def executeCall(step, ctx):
     functionName = step["callee"]["name"]
 
-    def sourceFunc(_):
+    def sourceFunc(_="Trash"):
         return True
 
     def sanitizerFunc():
