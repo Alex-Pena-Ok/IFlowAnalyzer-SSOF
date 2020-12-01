@@ -25,8 +25,12 @@ def checkIfStatement(step, ctx):
     testType = test["type"]
     ctx.taint = expressionTypes[testType](test, ctx)
 
-    block = step["consequent"]
-    checkBlockStatement(block, ctx)
+    blockTrue = step["consequent"]
+    checkBlockStatement(blockTrue, ctx)
+
+    blockFalse = step["alternate"]
+    if(blockFalse != None):
+        checkBlockStatement(blockFalse, ctx)
 
 # Executes a WhileStatement
 def checkWhileStatement(step, ctx):
@@ -34,7 +38,7 @@ def checkWhileStatement(step, ctx):
     testType = test["type"]
     ctx.taint = expressionTypes[testType](test, ctx)
 
-    block = step["consequent"]
+    block = step["body"]
     checkBlockStatement(block, ctx)
 
 # Executes a BlockStatement, called by while & if's, can have any of the other elements (expression, if, while...)
@@ -42,7 +46,7 @@ def checkWhileStatement(step, ctx):
 def checkBlockStatement(step, ctx):
     block = step["body"]
     checkSteps(block, ctx)
-    
+
     #TODO
     ctx.taint = False
 
