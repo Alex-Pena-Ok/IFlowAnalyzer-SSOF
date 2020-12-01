@@ -26,7 +26,7 @@ def checkIfStatement(step, ctx):
     checkBlockStatement(blockTrue, ctx)
 
     blockFalse = step["alternate"]
-    if(blockFalse != None):
+    if blockFalse is not None:
         checkBlockStatement(blockFalse, ctx)
 
 

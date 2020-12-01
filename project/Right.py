@@ -51,9 +51,15 @@ def rightCallExpressionAssignment(right, left, ctx):
     functionName = right["callee"]["name"]
     ltype = left["type"]
 
-    sourceFunc = lambda: leftAssignmentType[ltype](left, True, ctx, sourceName=functionName)
-    sanitizerFunc = lambda: leftAssignmentType[ltype](left, False, ctx)
-    sinkFunc = lambda: leftAssignmentType[ltype](left, True, ctx, sourceName=functionName)  # Im considering that the output of the sink is also tainted
+    def sourceFunc(sourceName=functionName):
+        return leftAssignmentType[ltype](left, True, ctx, sourceName)
+
+    def sanitizerFunc():
+        return leftAssignmentType[ltype](left, False, ctx)
+
+    def sinkFunc():
+        return leftAssignmentType[ltype](left, True, ctx, sourceName=functionName)
+
     arguments = right["arguments"]
     return callExpression(functionName, ctx, sourceFunc, sanitizerFunc, sinkFunc, arguments)
 

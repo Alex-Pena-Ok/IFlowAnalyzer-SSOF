@@ -23,9 +23,16 @@ def executeAssignment(step, ctx):
 # Executes a CallExpression, e.g. a() | a(b) | a(b()) | a(b(c('ola'))) | a(b(c(d)))
 def executeCall(step, ctx):
     functionName = step["callee"]["name"]
-    sourceFunc = lambda: True
-    sanitizerFunc = lambda: False
-    sinkFunc = lambda: True
+
+    def sourceFunc(_):
+        return True
+
+    def sanitizerFunc():
+        return False
+
+    def sinkFunc():
+        return True
+
     arguments = step["arguments"]
     return callExpression(functionName, ctx, sourceFunc, sanitizerFunc, sinkFunc, arguments)
 

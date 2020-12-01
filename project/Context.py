@@ -6,6 +6,7 @@ from VulnerabilityPattern import VulnerabilityPattern
 
 
 # This class contains the context of the program execution, aka. variables found, vulnerabilities...
+from constants import SOURCES
 
 
 class Context:
@@ -67,12 +68,12 @@ class Context:
         return ""
 
     # Create Vulnerability
-    def createVulnerability(self, vulnName, source, sink):
+    def createVulnerability(self, vulnName, taintedVariable, sink):
         # Vulnerability found, passing a tainted variable to a sink
         vuln = Vulnerability()
         vuln.setSink(sink)
         vuln.setName(vulnName)
-        vuln.setSource(source)
+        vuln.setSource(self.getSource(taintedVariable))
 
         for vulnPattern in self.vulnerabilitiesInPattern:
             if vulnPattern.getVulnerability() == vulnName:
@@ -82,10 +83,16 @@ class Context:
         return vuln
 
     # Gets the source associated with the TAINTED variable
+    # it does that by running the chain of TAINTED variables until
+    # it reaches the root SOURCE
     def getSource(self, argumentName):
         for var in self.variables:
             if var.getName() == argumentName:
-                return var.getSource()
+                source = var.getSource()
+                if self.searchInVulnPattern(source, SOURCES) != "":
+                    return source
+                else:
+                    return self.getSource(source)   # Finds the SOURCE of this TAINTED variable recursively
         return "SOURCE NOT FOUND"
 
     # Outputs the conclusion of the analysis tool
