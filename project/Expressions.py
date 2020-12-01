@@ -1,9 +1,13 @@
-from Right import rightLiteralAssignment, rightMemberExpressionAssignment, rightCallExpressionAssignment
+from expressionExecutor import callExpression, binaryExpression
+from Right import rightLiteralAssignment, rightMemberExpressionAssignment, rightCallExpressionAssignment, \
+    rightIdentifierAssignment, rightMemberBinaryExpression
 
 rightAssignmentType = {
     'Literal': rightLiteralAssignment,
+    'Identifier': rightIdentifierAssignment,
     'CallExpression': rightCallExpressionAssignment,
-    'MemberExpression': rightMemberExpressionAssignment
+    'MemberExpression': rightMemberExpressionAssignment,
+    'BinaryExpression': rightMemberBinaryExpression
 }
 
 
@@ -15,15 +19,20 @@ def executeAssignment(step, ctx):
 
     rightAssignmentType[rtype](right, left, ctx)
 
-# Executes a CallExpression, e.g. a() | a(b()) | a(b)
+
+# Executes a CallExpression, e.g. a() | a(b) | a(b()) | a(b(c('ola'))) | a(b(c(d)))
 def executeCall(step, ctx):
-    #TODO
-    print("TODO")
-    return "bool tainted or not"
+    functionName = step["callee"]["name"]
+    sourceFunc = lambda: True
+    sanitizerFunc = lambda: False
+    sinkFunc = lambda: True
+    arguments = step["arguments"]
+    return callExpression(functionName, ctx, sourceFunc, sanitizerFunc, sinkFunc, arguments)
 
 
 # Executes a BinaryExpression, e.g. a == b (the left or right can be an MemberExpression)
+# This one can only be called by IfStatementes and WhileStatements
+# It's necessary to check if the variables involved in the tests are TAINTED or UNTAINTED
 def executeBinaryExpression(step, ctx):
-    #TODO
-    print("TODO")
-    return "bool tainted or not"
+    return True if binaryExpression(step, ctx) != "" else False
+

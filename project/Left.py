@@ -2,13 +2,13 @@ from Variable import Variable
 from constants import SINKS
 
 
-def leftIdentifierAssignment(left, tainted, ctx, sourceName=""):
-    createVariable(left['name'], tainted, ctx)
+def leftIdentifierAssignment(left, tainted, ctx, sourceName="No source"):
+    createVariable(left['name'], tainted, ctx, sourceName)
     return
 
 
 # In case the left operator is an MemberExpression, it can be a sink
-def leftMemberExpressionAssignment(left, tainted, ctx, sourceName=""):
+def leftMemberExpressionAssignment(left, tainted, ctx, sourceName="No source"):
     memberName = left['name']
 
     # If the memberExpression on the left side is a sink and
@@ -18,12 +18,12 @@ def leftMemberExpressionAssignment(left, tainted, ctx, sourceName=""):
         vuln = ctx.createVulnerability(vulnName, sourceName, memberName, sourceName)
         ctx.addVulnerability(vuln)
 
-    createVariable(memberName, tainted, ctx)
+    createVariable(memberName, tainted, ctx, sourceName)
 
 
 # Creates a variable and add's it to the program analysis context
-def createVariable(varName, tainted, ctx):
+def createVariable(varName, tainted, ctx, sourceName):
     varName = varName
-    var = Variable(varName, tainted)
+    var = Variable(varName, tainted, sourceName)
     ctx.addVariable(var)
     return

@@ -1,5 +1,6 @@
-from Statements import checkSteps, checkExpressionStatement, checkBlockStatement, checkWhileStatement, checkIfStatement
+from Statements import checkSteps
 from Context import Context
+
 
 def analyzeProgram(programJson, vulnPattern):
     # Initializes object context, used to hold the state of the program during execution
