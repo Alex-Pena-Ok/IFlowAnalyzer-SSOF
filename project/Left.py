@@ -4,7 +4,6 @@ from constants import SINKS
 
 def leftIdentifierAssignment(left, tainted, ctx, sourceName="No source"):
     createVariable(left['name'], tainted, ctx, sourceName)
-    return
 
 
 # In case the left operator is an MemberExpression, it can be a sink

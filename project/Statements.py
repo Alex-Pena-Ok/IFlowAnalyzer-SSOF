@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from Expressions import executeAssignment, executeCall, executeBinaryExpression
 
 
@@ -20,14 +22,28 @@ def checkExpressionStatement(step, ctx):
 def checkIfStatement(step, ctx):
     test = step["test"]
     testType = test["type"]
+
+    # Checks if the test is using or produces any tainted variable
     ctx.taint = expressionTypes[testType](test, ctx)
 
-    blockTrue = step["consequent"]
-    checkBlockStatement(blockTrue, ctx)
+    # Different contexts are used below because if the same context was used
+    # the values of the variables would collide and provide incorrect values eventually
 
-    blockFalse = step["alternate"]
-    if blockFalse is not None:
-        checkBlockStatement(blockFalse, ctx)
+    # Executes the if block
+    consequentBlock = step["consequent"]
+    new_ctx_consequent = deepcopy(ctx)
+    checkBlockStatement(consequentBlock, new_ctx_consequent)
+
+    # Executes the else block, if there is any
+    alternateBlock = step["alternate"]
+    new_ctx_alternate = None
+    if alternateBlock is not None:
+        new_ctx_alternate = deepcopy(ctx)
+        checkBlockStatement(alternateBlock, new_ctx_alternate)
+
+    # Merge the contexts
+    ctx.mergeContexts(new_ctx_consequent, new_ctx_alternate)
+    return
 
 
 # Executes a WhileStatement
@@ -45,9 +61,6 @@ def checkWhileStatement(step, ctx):
 def checkBlockStatement(step, ctx):
     block = step["body"]
     checkSteps(block, ctx)
-
-    #TODO
-    ctx.taint = False
 
 
 # Dictionary to map between the expression type and the actual function to call

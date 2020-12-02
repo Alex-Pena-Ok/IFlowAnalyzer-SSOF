@@ -12,29 +12,21 @@ rightAssignmentType = {
 
 
 # Executes an AssignmentExpression, a = b | a = b() | a = document.url | document.url = a | document.url = a()
+# The result of this function doesn't matter for the IF and WHILE statements
 def executeAssignment(step, ctx):
     left = step["left"]  # In AssignmentExpressions, left type is always 'Identifier' or 'MemberExpression'
     right = step["right"]  # The type of right can be 'MemberExpression', 'CallExpression' or 'Literal'
     rtype = right["type"]
 
-    rightAssignmentType[rtype](right, left, ctx)
+    return rightAssignmentType[rtype](right, left, ctx)
 
 
 # Executes a CallExpression, e.g. a() | a(b) | a(b()) | a(b(c('ola'))) | a(b(c(d)))
 def executeCall(step, ctx):
     functionName = step["callee"]["name"]
 
-    def sourceFunc(_="Trash"):
-        return True
-
-    def sanitizerFunc():
-        return False
-
-    def sinkFunc():
-        return True
-
     arguments = step["arguments"]
-    return callExpression(functionName, ctx, sourceFunc, sanitizerFunc, sinkFunc, arguments)
+    return callExpression(functionName, ctx, arguments)
 
 
 # Executes a BinaryExpression, e.g. a == b (the left or right can be an MemberExpression)

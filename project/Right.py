@@ -15,7 +15,7 @@ leftAssignmentType = {
 def rightLiteralAssignment(right, left, ctx):
     ltype = left["type"]
     leftAssignmentType[ltype](left, False, ctx)
-    return
+    return False
 
 
 # Check if the right side value is tainted
@@ -25,9 +25,10 @@ def rightIdentifierAssignment(right, left, ctx):
 
     if ctx.checkVariable(varName):
         leftAssignmentType[ltype](left, True, ctx, sourceName=ctx.getSource(varName))
+        return True
     else:
         leftAssignmentType[ltype](left, False, ctx)
-    return
+        return False
 
 
 # In the right side of an assignment, a member expression can
@@ -40,9 +41,10 @@ def rightMemberExpressionAssignment(right, left, ctx):
 
     if ctx.searchInVulnPattern(functionName, SOURCES) != "":
         leftAssignmentType[ltype](left, True, ctx, sourceName=functionName)
+        return True
     else:
         leftAssignmentType[ltype](left, False, ctx)
-    return
+        return False
 
 
 # In a Expression Assignment, function call's, can only be
@@ -52,16 +54,24 @@ def rightCallExpressionAssignment(right, left, ctx):
     ltype = left["type"]
 
     def sourceFunc(sourceName=functionName):
-        return leftAssignmentType[ltype](left, True, ctx, sourceName)
+        leftAssignmentType[ltype](left, True, ctx, sourceName)
+        return
 
     def sanitizerFunc():
-        return leftAssignmentType[ltype](left, False, ctx)
+        leftAssignmentType[ltype](left, False, ctx)
+        return
 
     def sinkFunc():
-        return leftAssignmentType[ltype](left, True, ctx, sourceName=functionName)
+        leftAssignmentType[ltype](left, True, ctx, sourceName=functionName)
+        return
+
+    # Function called when there is no tainted variable
+    def defaultFunc():
+        leftAssignmentType[ltype](left, False, ctx)
+        return
 
     arguments = right["arguments"]
-    return callExpression(functionName, ctx, sourceFunc, sanitizerFunc, sinkFunc, arguments)
+    return callExpression(functionName, ctx, arguments, sourceFunc, sanitizerFunc, sinkFunc, defaultFunc)
 
 
 # In a expression assignment the right side can be of type: a = a+b | a = a+b+c...
@@ -74,8 +84,9 @@ def rightMemberBinaryExpression(right, left, ctx):
     source = binaryExpression(right, ctx)
     if source != "":
         leftAssignmentType[ltype](left, True, ctx, sourceName=source)
+        return True
     else:
         leftAssignmentType[ltype](left, False, ctx)
-    return
+        return False
 
 

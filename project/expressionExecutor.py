@@ -5,7 +5,7 @@ sourceName = ""
 
 
 # Execute the first level of a function call
-def callExpression(functionName, ctx, sourceFunc, sanitizerFunc, sinkFunc, arguments):
+def callExpression(functionName, ctx, arguments, sourceFunc=lambda _: True, sanitizerFunc=lambda: False, sinkFunc=lambda: True, defaultFunc=lambda: False):
     # Check if the CallExpression callee is a source
     # if it's a source, it's parameters don't really matter.
     if ctx.searchInVulnPattern(functionName, SOURCES) != "":
@@ -57,11 +57,14 @@ def callExpression(functionName, ctx, sourceFunc, sanitizerFunc, sinkFunc, argum
         # Handles: b(a) type of vulnerabilities
         if argType == "Identifier":
             varName = argument["name"]
-            return executeIdentifierInCallExpression(functionName, varName, ctx, sourceFunc, sinkFunc)
+            if executeIdentifierInCallExpression(functionName, varName, ctx, sourceFunc, sinkFunc):
+                return True
 
-    return False
+    return defaultFunc()
 
 
+#TODO: This function is probably unecessary, improve code
+#
 # Argument is a nested function, the 'callExpression' must then be
 # called recursively. There is also no assignment in a nested function
 # therefore we don't need to worry about adding a TAINTED variable.
@@ -147,7 +150,7 @@ def executeIdentifierInCallExpression(functionName, varName, ctx, sourceFunc, si
         return False
 
 
-# Returns true if any of the arguments involved are a sink using tainted variables
+# Returns the name of the source if any of the arguments involved are a sink using tainted variables
 # or tainted variable.
 # Inside a member expression can be multiple member expressions or function call's.
 # e.g. f=e(c+"oi"+d+"hi"+h(),g);
@@ -164,11 +167,8 @@ def binaryExpression(curr, ctx):
                 return ""  # The variable is UNTAINTED
         elif currType == "CallExpression": # TODO: And when CallExpression has to then call back another BinaryExpression? Jesus christ
             functionName = curr["callee"]["name"]
-            sourceFunc = lambda _: True
-            sanitizerFunc = lambda _: False
-            sinkFunc = lambda _: True
             arguments = curr["arguments"]
-            return callExpression(functionName, ctx, sourceFunc, sanitizerFunc, sinkFunc, arguments)
+            return callExpression(functionName, ctx, arguments)
 
     # Recursively check LEFT side for TAINTED variables
     if curr["left"]["type"] is not None:
