@@ -22,14 +22,16 @@ class Context:
         self.vulnerabilitiesFound.append(vulnerability)
 
     # Add's a variable to the program context or updates it if it already exists
-    def addVariable(self, variable):
+    def addVariable(self, newVariable):
         # Check if variable already exists, if so just update it
         for var in self.variables:
-            if variable.getName() == var.getName():
-                var.setTainted(variable.getTainted())
-                var.setSource(variable.getSource())
+            if newVariable.getName() == var.getName():
+                var.setTainted(newVariable.getTainted())
+                src = newVariable.getSource()
+                if src != var.getName():
+                    var.setSource(src)
                 return
-        self.variables.append(variable)
+        self.variables.append(newVariable)
 
     # Check's if the current variable is tainted or not
     def checkVariable(self, variableName):
@@ -120,23 +122,41 @@ class Context:
             # but if in both contexts the var is UNTAINTED in the final merge
             # the var must be tainted
             new_ctx_consequent.merge(new_ctx_alternate)
-            self.merge(new_ctx_consequent)
+            self.merge(new_ctx_consequent, True)
         else:
-            self.merge(new_ctx_consequent)
+            self.merge(new_ctx_consequent)  # We don't know if the if was taken, therefore not newPrivileged path
         return
 
-    def merge(self, new_context):
+    def merge(self, new_context, newPrivileged=False):
         for varNewCtx in new_context.variables:
             found = False
             for varCurrCtx in self.variables:
                 if varCurrCtx.getName() == varNewCtx.getName():
                     found = True
-                    # If any of the contexts has the curr variable has TAINTED
-                    # the end result will also de TAINTED
-                    if varNewCtx.getTainted() and not varCurrCtx.getTainted():
-                        varCurrCtx.setTainted(True)
+                    if not newPrivileged:
+                        # If any of the contexts has the curr variable has TAINTED
+                        # the end result will also de TAINTED
+                        # The not condition is to not clear the source of the variable
+                        if varNewCtx.getTainted() and not varCurrCtx.getTainted():
+                            varCurrCtx.setTainted(True)
+                            varCurrCtx.setSource(varNewCtx.getSource())
+                    else:
+                        # The 'newPrivileged' path means that the result context 'new_context' was merged with a
+                        # 'new_ctx_alternate' (alternate block) which means there was an ELSE to the condition
+                        # if the IF didn't execute we are sure the ELSE did, and there could have been a potentially
+                        # sanitizer function in the else, which the not newPrivileged path would ignore and still
+                        # consider it tainted.
+                        # e.g.
+                        # a = source()
+                        # if (...) { b() } else { a = sanitizer(a) }
+                        # This path is only taken when its time to merge a main context (previous to the IfStatement)
+                        # with the newContext which resulted from the TAINTED 'OR' merge
+                        # of consequentCtx with alternateCtx
+                        varCurrCtx.setTainted(varNewCtx.getTainted())
                         varCurrCtx.setSource(varNewCtx.getSource())
 
+            # variable was not declared before the context of the block consequent or alternate
+            # we must then add it to the main context before leaving or it would disappear
             if not found:
                 self.addVariable(varNewCtx)
 

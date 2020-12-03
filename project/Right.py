@@ -55,11 +55,11 @@ def rightCallExpressionAssignment(right, left, ctx):
 
     def sourceFunc(sourceName=functionName):
         leftAssignmentType[ltype](left, True, ctx, sourceName)
-        return
+        return True
 
     def sanitizerFunc():
         leftAssignmentType[ltype](left, False, ctx)
-        return
+        return False
 
     def sinkFunc():
         leftAssignmentType[ltype](left, True, ctx, sourceName=functionName)
