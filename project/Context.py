@@ -17,9 +17,21 @@ class Context:
         self.variables = []
         self.taint = False
 
-    # Add's a vulnerability to the program context
+    # Add's a vulnerability to the program context or updates is list of sources/sink
+    # if it already exists
     def addVulnerability(self, vulnerability):
+        vuln = None
+        for vulnsFound in self.vulnerabilitiesFound:
+            if vulnsFound.getVulnerability() == vulnerability.getVulnerability():
+                vulnsFound.updateVulnerability(vulnerability)
+                return
+
         self.vulnerabilitiesFound.append(vulnerability)
+
+        # Set's the pair of sanitizers for the given vulnerability
+        for vulnPattern in self.vulnerabilitiesInPattern:
+            if vulnPattern.getVulnerability() == vulnerability.getVulnerability():
+                vulnerability.setSanitizer(vulnPattern.getSanitizers())
 
     # Add's a variable to the program context or updates it if it already exists
     def addVariable(self, newVariable):
