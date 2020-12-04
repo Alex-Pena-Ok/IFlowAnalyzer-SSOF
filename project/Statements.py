@@ -21,10 +21,10 @@ def checkExpressionStatement(step, ctx):
 # Executes an IfStatement, binary expressions
 def checkIfStatement(step, ctx):
     test = step["test"]
-    # testType = test["type"]
+    testType = test["type"]
 
     # Checks if the test is using or produces any tainted variable
-    # ctx.taint = expressionTypes[testType](test, ctx)
+    ctx.taint = expressionTypes[testType](test, ctx)
 
     # Different contexts are used below because if the same context was used
     # the values of the variables would collide and provide incorrect values eventually
@@ -49,8 +49,8 @@ def checkIfStatement(step, ctx):
 # Executes a WhileStatement
 def checkWhileStatement(step, ctx):
     test = step["test"]
-    # testType = test["type"]
-    # ctx.taint = expressionTypes[testType](test, ctx)
+    testType = test["type"]
+    ctx.taint = expressionTypes[testType](test, ctx)
 
     block = step["body"]
     new_ctx_consequent = deepcopy(ctx)

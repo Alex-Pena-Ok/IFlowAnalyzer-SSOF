@@ -9,7 +9,7 @@ def callExpression(functionName, ctx, arguments, sourceFunc=lambda _: True, sani
     # Check if the CallExpression callee is a source
     # if it's a source, it's parameters don't really matter.
     if ctx.searchInVulnPattern(functionName, SOURCES) != "":
-        return sourceFunc()
+        return sourceFunc("")
 
     # Check if the CallExpression calle is a sanitizer
     # I assumed here that the sanitizer returns a new sanitized variable
@@ -47,7 +47,7 @@ def callExpression(functionName, ctx, arguments, sourceFunc=lambda _: True, sani
                     if vulnName != "":
                         vuln = ctx.createVulnerability(vulnName, sourceName, sinkName)
                         ctx.addVulnerability(vuln)
-                return sourceFunc()  # Only returns TRUE if the nested level right below the 1st is returning TAINTED
+                return sourceFunc("")  # Only returns TRUE if the nested level right below the 1st is returning TAINTED
 
         # Handles: "a"+b() type of vulnerabilities
         if argType == "BinaryExpression":

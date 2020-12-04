@@ -17,6 +17,9 @@ class Context:
         self.variables = []
         self.taint = False
 
+    def getContextTaint(self):
+        return self.taint
+
     # Add's a vulnerability to the program context or updates is list of sources/sink
     # if it already exists
     def addVulnerability(self, vulnerability):

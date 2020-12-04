@@ -1,8 +1,8 @@
 [
     {
         "vulnerability": "Command Injection",
-        "sources": ["t"],
-        "sanitizers": [],
+        "sources": ["a"],
+        "sanitizers": ["t"],
         "sinks": ["z"]
     }
 ]

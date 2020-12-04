@@ -11,8 +11,25 @@ leftAssignmentType = {
 }
 
 
+# Everytime that a TAINTED variable is used in a test (if/while)
+# the context will become TAINTED and if there is any type of assignment
+# the left identifiers will become TAINTED
+def checkImplicitFlow(left, ctx):
+    ltype = left["type"]
+
+    # If the context is tainted we know that the left side will instantly be tainted
+    # therefore the assignment is instantly TAINTED
+    if ctx.getContextTaint():
+        leftAssignmentType[ltype](left, True, ctx, sourceName="Implicit Flow")
+        return True
+    return False
+
+
 # A literal is always considered safe
 def rightLiteralAssignment(right, left, ctx):
+    if checkImplicitFlow(left, ctx):
+        return True
+
     ltype = left["type"]
     leftAssignmentType[ltype](left, False, ctx)
     return False
@@ -20,6 +37,9 @@ def rightLiteralAssignment(right, left, ctx):
 
 # Check if the right side value is tainted
 def rightIdentifierAssignment(right, left, ctx):
+    if checkImplicitFlow(left, ctx):
+        return True
+
     ltype = left["type"]
     varName = right["name"]
 
@@ -36,6 +56,9 @@ def rightIdentifierAssignment(right, left, ctx):
 # will be tainted.
 # PS: I don't think there are any memberExpression tests
 def rightMemberExpressionAssignment(right, left, ctx):
+    if checkImplicitFlow(left, ctx):
+        return True
+
     functionName = right["callee"]["name"]
     ltype = left["type"]
 
@@ -50,6 +73,9 @@ def rightMemberExpressionAssignment(right, left, ctx):
 # In a Expression Assignment, function call's, can only be
 # present in the right side
 def rightCallExpressionAssignment(right, left, ctx):
+    if checkImplicitFlow(left, ctx):
+        return True
+
     functionName = right["callee"]["name"]
     ltype = left["type"]
 
@@ -78,6 +104,9 @@ def rightCallExpressionAssignment(right, left, ctx):
 # The variables involved in the binary expression must be checked to
 # guarantee that none are TAINTED
 def rightMemberBinaryExpression(right, left, ctx):
+    if checkImplicitFlow(left, ctx):
+        return True
+
     ltype = left["type"]
 
     # In a binary expression the source can result from a variable or function
